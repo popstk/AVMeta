@@ -4,23 +4,34 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/net/html"
 	"io/ioutil"
 	"regexp"
 	"strings"
 
+	"github.com/antchfx/htmlquery"
 	"github.com/ylqjgm/AVMeta/pkg/util"
+)
 
-	"github.com/PuerkitoBio/goquery"
+const (
+	exprTitle       = `/html/head/title/text()`
+	exprStudio      = `//*[@id="top"]/div[1]/section[1]/div/section/div[2]/ul/li[3]/a/text()`
+	exprRelease     = `//*[@id="top"]/div[1]/section[1]/div/section/div[2]/div[2]/p/text()`
+	exprRuntime     = `//p[@class='items_article_info']/text()`
+	exprDirector    = `//*[@id="top"]/div[1]/section[1]/div/section/div[2]/ul/li[3]/a/text()`
+	exprActor       = `//*[@id="top"]/div[1]/section[1]/div/section/div[2]/ul/li[3]/a/text()`
+	exprCover       = `//div[@class='items_article_MainitemThumb']/span/img/@src`
+	exprExtraFanArt = `//ul[@class="items_article_SampleImagesArea"]/li/a/@href`
+	exprTags        = `//a[@class='tag tagTag']/text()`
 )
 
 // FC2Scraper fc2网站刮削器
 type FC2Scraper struct {
-	Proxy       string            // 代理设置
-	uri         string            // 页面地址
-	code        string            // 临时番号
-	number      string            // 最终番号
-	fc2Root     *goquery.Document // fc2根节点
-	fc2clubRoot *goquery.Document // fc2club根节点
+	Proxy   string     // 代理设置
+	uri     string     // 页面地址
+	code    string     // 临时番号
+	number  string     // 最终番号
+	fc2Root *html.Node // fc2根节点
 }
 
 // fc2标签json结构
@@ -51,42 +62,29 @@ func (s *FC2Scraper) Fetch(code string) error {
 	// 组合fc2地址
 	fc2uri := fmt.Sprintf("https://adult.contents.fc2.com/article/%s/", s.code)
 	// 组合fc2club地址
-	fc2cluburi := fmt.Sprintf("https://fc2club.net/html/FC2-%s.html", s.code)
 
-	// 打开fc2
-	fc2Root, err := util.GetRoot(fc2uri, s.Proxy, nil)
-	// 检查错误
+	fc2Root, err := htmlquery.LoadURL(fc2uri)
 	if err != nil {
 		return err
 	}
 
-	// 打开fc2club
-	fc2clubRoot, err := util.GetRoot(fc2cluburi, s.Proxy, nil)
-	// 检查错误
-	if err != nil {
-		return err
-	}
-
-	// 设置页面地址
 	s.uri = fc2uri
-	// 设置fc2根节点
 	s.fc2Root = fc2Root
-	// 设置fc2club根节点
-	s.fc2clubRoot = fc2clubRoot
-
 	return nil
+}
+
+func FindFromText(r *html.Node, expr string) string {
+	node := htmlquery.FindOne(r, expr)
+	if node == nil {
+		return ""
+	}
+
+	return htmlquery.InnerText(node)
 }
 
 // GetTitle 获取名称
 func (s *FC2Scraper) GetTitle() string {
-	// 获取标题
-	title := s.fc2Root.Find(`.items_article_headerInfo h3`).Text()
-	// 检查
-	if title == "" {
-		title = s.fc2clubRoot.Find(`.main h3`).Text()
-	}
-
-	return title
+	return FindFromText(s.fc2Root, exprTitle)
 }
 
 // GetIntro 获取简介
@@ -96,19 +94,18 @@ func (s *FC2Scraper) GetIntro() string {
 
 // GetDirector 获取导演
 func (s *FC2Scraper) GetDirector() string {
-	// 获取导演
-	director := s.fc2Root.Find(`.items_article_headerInfo li:nth-child(3) a`).Text()
-	// 检查
-	if director == "" {
-		director = s.fc2clubRoot.Find(`.main h5:nth-child(5) a:nth-child(2)`).Text()
-	}
-
-	return director
+	return FindFromText(s.fc2Root, exprDirector)
 }
 
 // GetRelease 发行时间
 func (s *FC2Scraper) GetRelease() string {
-	return strings.ReplaceAll(strings.ReplaceAll(s.fc2Root.Find(`.items_article_Releasedate p`).Text(), "上架时间 :", ""), "販売日 :", "")
+	node := htmlquery.FindOne(s.fc2Root, exprRelease)
+	if node == nil {
+		return ""
+	}
+
+	val := htmlquery.InnerText(node)
+	return strings.ReplaceAll(strings.Trim(val, " ['販売日 : ']"), "/", "-")
 }
 
 // GetRuntime 获取时长
@@ -168,23 +165,27 @@ func (s *FC2Scraper) GetTags() []string {
 
 // GetCover 获取图片
 func (s *FC2Scraper) GetCover() string {
-	// 获取图片
-	fanart, _ := s.fc2clubRoot.Find(`.slides li:nth-child(1) img`).Attr("src")
-	// 检查
-	if fanart == "" {
+	node := htmlquery.FindOne(s.fc2Root, exprCover)
+	if node == nil {
 		return ""
 	}
 
-	if fanart[0:2] == ".." {
-		fanart = fanart[2:]
-	}
-	// 组合地址
-	return fmt.Sprintf("https://fc2club.net%s", fanart)
+	return "https://adult.contents.fc2.com" + htmlquery.InnerText(node)
 }
 
 // GetActors 获取演员
 func (s *FC2Scraper) GetActors() map[string]string {
-	return nil
+	node := htmlquery.FindOne(s.fc2Root, exprActor)
+	if node == nil {
+		return map[string]string{
+			"素人": "",
+		}
+	}
+
+	val := htmlquery.InnerText(node)
+	return map[string]string{
+		val: "",
+	}
 }
 
 // GetURI 获取页面地址
