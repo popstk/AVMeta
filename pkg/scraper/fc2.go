@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"golang.org/x/net/html"
 	"io/ioutil"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -61,9 +62,13 @@ func (s *FC2Scraper) Fetch(code string) error {
 	s.code = r.FindString(code)
 	// 组合fc2地址
 	fc2uri := fmt.Sprintf("https://adult.contents.fc2.com/article/%s/", s.code)
-	// 组合fc2club地址
 
-	fc2Root, err := htmlquery.LoadURL(fc2uri)
+	data, status, err := util.MakeRequest("GET", fc2uri, s.Proxy, nil, nil, nil)
+	if err != nil || status >= http.StatusBadRequest {
+		return fmt.Errorf("%s [fetch]: status: %d", status)
+	}
+
+	fc2Root, err := htmlquery.Parse(bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
