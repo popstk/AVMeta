@@ -7,12 +7,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ylqjgm/AVMeta/pkg/logs"
-	"runtime"
-
-	"github.com/ylqjgm/AVMeta/pkg/util"
-
 	"github.com/spf13/cobra"
+	"github.com/ylqjgm/AVMeta/pkg/logs"
+	"github.com/ylqjgm/AVMeta/pkg/util"
+	"runtime"
 )
 
 // 采集站点变量
@@ -65,12 +63,7 @@ func (e *Executor) initConfig() {
 	cfg, err := util.GetConfig()
 	// 检查
 	if err != nil {
-		// 初始化配置
-		cfg, err = util.WriteConfig()
-		// 检查
-		if err != nil {
-			logs.FatalError(err)
-		}
+		logs.FatalError(err)
 	}
 
 	// 配置信息

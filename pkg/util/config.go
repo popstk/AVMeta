@@ -2,6 +2,7 @@ package util
 
 import (
 	"github.com/spf13/viper"
+	"sort"
 )
 
 // BaseStruct 配置信息基础节点
@@ -11,10 +12,10 @@ type BaseStruct struct {
 
 // PathStruct 配置信息路径节点
 type PathStruct struct {
-	Success   string // 成功存储目录
-	Fail      string // 失败存储目录
-	Directory string // 影片存储路径格式
-	Filter    string // 文件名过滤规则
+	Success   string   // 成功存储目录
+	Fail      string   // 失败存储目录
+	Directory string   // 影片存储路径格式
+	Filter    []string // 文件名过滤规则
 }
 
 // MediaStruct 配置信息媒体库节点
@@ -38,6 +39,7 @@ type ConfigStruct struct {
 	Path  PathStruct  // 路径配置
 	Media MediaStruct // 媒体库配置
 	Site  SiteStruct  // 免翻地址配置
+	Code  []string    // 优先匹配番号
 }
 
 // GetConfig 读取配置信息，返回配置信息对象，
@@ -68,6 +70,15 @@ func GetConfig() (*ConfigStruct, error) {
 	// 反序列
 	err = viper.Unmarshal(&config)
 
+	// 初始化配置
+	sort.Slice(config.Path.Filter, func(i, j int) bool {
+		if len(config.Path.Filter[i]) != len(config.Path.Filter[j]) {
+			return len(config.Path.Filter[i]) > len(config.Path.Filter[j])
+		}
+
+		return config.Path.Filter[i] < config.Path.Filter[j]
+	})
+
 	return &config, err
 }
 
@@ -90,7 +101,7 @@ func WriteConfig() (*ConfigStruct, error) {
 			Success:   "success",
 			Fail:      "fail",
 			Directory: "{number}",
-			Filter:    "-hd||hd-||_hd||hd_||[||]||【||】||asfur||~||-full||_full||3xplanet||monv||云中飘荡||@||tyhg999.com||xxxxxxxx||-fhd||_fhd||thz.la",
+			Filter:    []string{"thz.la"},
 		},
 		Media: MediaStruct{
 			Library:   "nfo",
@@ -110,6 +121,7 @@ func WriteConfig() (*ConfigStruct, error) {
 	viper.Set("path", cfg.Path)
 	viper.Set("media", cfg.Media)
 	viper.Set("site", cfg.Site)
+	viper.Set("code", cfg.Code)
 
 	return cfg, viper.SafeWriteConfig()
 }

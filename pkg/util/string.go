@@ -3,6 +3,7 @@ package util
 import (
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -10,13 +11,22 @@ import (
 //
 // filename 字符串，传入要提取的文件名称，
 // filter 字符串，要对文件名称进行过滤的规则信息。
-func GetCode(filename, filter string) string {
+func GetCode(filename string, regs, filters []string) string {
 	// 获取正确文件名
 	filename = filepath.Base(strings.ToLower(filename))
 	// 删除扩展名
 	filename = strings.TrimSuffix(filename, path.Ext(filename))
-	// 转换过滤规则为数组
-	filters := strings.Split(filter, "||")
+	// 转为小写
+	filename = strings.ToLower(filename)
+
+	// 优先提取
+	for _, reg := range regs {
+		val := regexp.MustCompile(reg).FindString(filename)
+		if len(val) > 0 {
+			return val
+		}
+	}
+
 	// 循环过滤
 	for _, f := range filters {
 		// 过滤

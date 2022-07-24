@@ -170,7 +170,8 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 	var err error
 
 	// 提取番号
-	code := util.GetCode(file, cfg.Path.Filter)
+	code := util.GetCode(file, cfg.Code, cfg.Path.Filter)
+	fmt.Printf("code is %s\n", code)
 
 	// 定义一个拥有正则匹配的刮削对象数组
 	sr := []captures{
@@ -197,7 +198,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 		{
 			Name: "FC2",
 			S:    scraper.NewFC2Scraper(cfg.Base.Proxy),
-			R:    regexp.MustCompile(`^fc2-[0-9]{6,7}`),
+			R:    regexp.MustCompile(`^fc2-(ppv-)?[0-9]{6,7}`),
 		},
 		{
 			Name: "Siro",
@@ -248,7 +249,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				logs.Info("文件 [%s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", path.Base(file), i, scr.Name, err)
+				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", path.Base(file), code, i, scr.Name, err)
 			}
 		}
 	}
@@ -267,7 +268,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				logs.Info("文件 [%s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", path.Base(file), i, sc.Name, err)
+				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", path.Base(file), code, i, sc.Name, err)
 			}
 		}
 	}

@@ -45,7 +45,7 @@ func (s *FC2Scraper) Fetch(code string) error {
 	// 设置番号
 	s.number = strings.ToUpper(code)
 	// 过滤番号
-	r := regexp.MustCompile(`[0-9]{6,7}`)
+	r := regexp.MustCompile(`\d{6,7}`)
 	// 获取临时番号
 	s.code = r.FindString(code)
 	// 组合fc2地址
@@ -129,7 +129,7 @@ func (s *FC2Scraper) GetSeries() string {
 // GetTags 获取标签
 func (s *FC2Scraper) GetTags() []string {
 	// 组合地址
-	uri := fmt.Sprintf("http://adult.contents.fc2.com/api/v4/article/%s/tag?", s.code)
+	uri := fmt.Sprintf("https://adult.contents.fc2.com/api/v4/article/%s/tag?", s.code)
 
 	// 读取远程数据
 	data, err := util.GetResult(uri, s.Proxy, nil)
