@@ -250,7 +250,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", path.Base(file), code, i, scr.Name, err)
+				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", filepath.Base(file), code, i, scr.Name, err)
 			}
 		}
 	}
