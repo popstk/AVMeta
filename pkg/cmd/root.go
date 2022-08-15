@@ -51,6 +51,7 @@ func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
 
 	// 获取当前执行路径
 	curDir := util.GetRunPath()
+	logs.Info("walk dir %s", curDir)
 
 	// 列当前目录
 	files, err := util.WalkDir(curDir, e.cfg.Path.Success, e.cfg.Path.Fail)
@@ -70,7 +71,7 @@ func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
 		// 计数加
 		wg.AddDelta()
 		// 刮削进程
-		go e.packProcess(file, wg)
+		e.packProcess(file, wg)
 	}
 
 	// 等待结束
@@ -86,6 +87,7 @@ func (e *Executor) packProcess(file string, wg *util.WaitGroup) {
 		// 恢复文件
 		util.FailFile(file, e.cfg.Path.Fail)
 
+		logs.Error("pack err: %v", err)
 		// 进程
 		wg.Done()
 

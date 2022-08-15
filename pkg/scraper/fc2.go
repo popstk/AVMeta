@@ -65,7 +65,7 @@ func (s *FC2Scraper) Fetch(code string) error {
 
 	data, status, err := util.MakeRequest("GET", fc2uri, s.Proxy, nil, nil, nil)
 	if err != nil || status >= http.StatusBadRequest {
-		return fmt.Errorf("%s [fetch]: status: %d", status)
+		return fmt.Errorf("%s [fetch]: status: %d", fc2uri, status)
 	}
 
 	fc2Root, err := htmlquery.Parse(bytes.NewReader(data))
@@ -104,12 +104,7 @@ func (s *FC2Scraper) GetDirector() string {
 
 // GetRelease 发行时间
 func (s *FC2Scraper) GetRelease() string {
-	node := htmlquery.FindOne(s.fc2Root, exprRelease)
-	if node == nil {
-		return ""
-	}
-
-	val := htmlquery.InnerText(node)
+	val := FindFromText(s.fc2Root, exprRelease)
 	return strings.ReplaceAll(strings.Trim(val, " ['販売日 : ']"), "/", "-")
 }
 
@@ -170,12 +165,13 @@ func (s *FC2Scraper) GetTags() []string {
 
 // GetCover 获取图片
 func (s *FC2Scraper) GetCover() string {
-	node := htmlquery.FindOne(s.fc2Root, exprCover)
-	if node == nil {
+	val := FindFromText(s.fc2Root, exprCover)
+	if len(val) == 0 {
 		return ""
 	}
 
-	return "https://adult.contents.fc2.com" + htmlquery.InnerText(node)
+	p, _ := util.JoinPath("https://adult.contents.fc2.com", val)
+	return p
 }
 
 // GetActors 获取演员

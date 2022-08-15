@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"golang.org/x/net/html"
 	"net/http"
 	"strings"
 	"time"
@@ -17,6 +18,7 @@ type SiroScraper struct {
 	uri    string            // 页面地址
 	number string            // 最终番号
 	root   *goquery.Document // 根节点
+	node   *html.Node
 }
 
 // NewSiroScraper 返回一个被初始化的siro刮削对象

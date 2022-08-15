@@ -6,6 +6,7 @@ import (
 	"github.com/ylqjgm/AVMeta/pkg/logs"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -64,7 +65,7 @@ func packNfo(file string, cfg *util.ConfigStruct) (*Media, error) {
 	// 获取视频后缀
 	ext := path.Ext(file)
 	// 移动视频文件
-	err = util.MoveFile(file, fmt.Sprintf("%s/%s%s", m.DirPath, m.Number, ext))
+	err = util.MoveFile(file, filepath.Join(m.DirPath, m.Number+ext))
 
 	return m, err
 }
@@ -107,7 +108,7 @@ func packVSMeta(file string, cfg *util.ConfigStruct) (*Media, error) {
 	_ = os.Remove(fmt.Sprintf("%s/fanart.jpg", m.DirPath))
 
 	// 移动视频文件
-	err = util.MoveFile(file, fmt.Sprintf("%s/%s%s", m.DirPath, m.Number, ext))
+	err = util.MoveFile(file, filepath.Join(m.DirPath, m.Number+ext))
 
 	return m, err
 }
@@ -198,7 +199,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 		{
 			Name: "FC2",
 			S:    scraper.NewFC2Scraper(cfg.Base.Proxy),
-			R:    regexp.MustCompile(`^fc2-(ppv-)?[0-9]{6,7}`),
+			R:    regexp.MustCompile(`^fc2-?(ppv)?-?\d{5,10}`),
 		},
 		{
 			Name: "Siro",
@@ -277,6 +278,8 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 	if err != nil || s == nil {
 		return nil, err
 	}
+
+	logs.Info("match site: %s", site)
 
 	// 刮削并获取nfo对象
 	return ParseMedia(s, site)
