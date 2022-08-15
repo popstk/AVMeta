@@ -12,7 +12,8 @@ import (
 // actress命令
 func (e *Executor) initActress() {
 	actressCmd := &cobra.Command{
-		Use: "actress",
+		Use:   "actress",
+		Short: "头像下载、入库",
 		Long: `
 自动从各网站提取女优头像并上传至 Emby 服务器中`,
 		Example: `  AVMeta actress

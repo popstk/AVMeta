@@ -15,33 +15,12 @@ func (e *Executor) initRoot() {
 	e.rootCmd = &cobra.Command{
 		Use:   "AVMeta",
 		Short: "一款使用 Golang 编写的跨平台 AV 元数据刮削器",
-		Long: `
-AVMeta 是一款使用 Golang 编写的跨平台 AV 元数据刮削器
+		Long: `AVMeta 是一款使用 Golang 编写的跨平台 AV 元数据刮削器
 使用 AVMeta, 您可自动将 AV 电影进行归类整理
 并生成对应媒体库元数据文件`,
 		Run: e.rootRunFunc,
 	}
-}
-
-func (e *Executor) setTemplate() {
-	// 重设使用显示模板
-	e.rootCmd.SetUsageTemplate(`使用:{{if .Runnable}}
-  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-  {{.CommandPath}} [command]{{end}}{{if .HasExample}}
-
-示例:
-{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
-
-命令:
-  actress     头像下载、入库
-  nfo         nfo文件转换为VSMeta文件
-  help        命令执行帮助
-  init        生成配置文件
-  version     显示程序版本{{end}}{{if .HasAvailableSubCommands}}
-
-使用 "{{.CommandPath}} help [command]" 可获取更多命令帮助.{{end}}
-
-`)
+	e.rootCmd.PersistentFlags().String("p", "", "设置目录")
 }
 
 // root命令执行函数
@@ -61,7 +40,7 @@ func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
 	// 获取总量
 	count := len(files)
 	// 输出总量
-	logs.Info("\n\n共探索到 %d 个视频文件, 开始刮削整理...\n\n", count)
+	logs.Info("\n\n共探索到 %d 个视频文件, 开始刮削整理...\n", count)
 
 	// 初始化进程
 	wg := util.NewWaitGroup(2)

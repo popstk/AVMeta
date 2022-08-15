@@ -38,9 +38,9 @@ type NfoFile struct {
 // nfo命令
 func (e *Executor) initNfo() {
 	nfoCmd := &cobra.Command{
-		Use: "nfo",
-		Long: `
-自动将运行目录下所有nfo文件转换为VSMeta文件`,
+		Use:     "nfo",
+		Short:   "nfo文件转换为VSMeta文件",
+		Long:    `自动将运行目录下所有nfo文件转换为VSMeta文件`,
 		Example: `  AVMeta nfo`,
 		Run:     e.nfoRunFunc,
 	}

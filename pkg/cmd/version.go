@@ -6,9 +6,9 @@ import (
 
 func (e *Executor) initVersion() {
 	e.rootCmd.AddCommand(&cobra.Command{
-		Use: "version",
-		Long: `
-执行本命令打印当前您所使用的 AVMeta 版本信息`,
+		Use:   "version",
+		Short: "显示程序版本",
+		Long:  `执行本命令打印当前您所使用的 AVMeta 版本信息`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Printf("Version:\t%s\n", e.version)
 			cmd.Printf("Git commit:\t%s\n", e.commit)

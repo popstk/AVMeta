@@ -236,6 +236,8 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 	// 刮削网站变量
 	var site string
 
+	srcFile := filepath.Base(file)
+
 	// 查找正则匹配
 	for _, scr := range sr {
 		// 检查是否匹配
@@ -250,7 +252,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", filepath.Base(file), code, i, scr.Name, err)
+				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", srcFile, code, i, scr.Name, err)
 			}
 		}
 	}
@@ -269,7 +271,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", path.Base(file), code, i, sc.Name, err)
+				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", srcFile, code, i, sc.Name, err)
 			}
 		}
 	}
