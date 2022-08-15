@@ -28,7 +28,7 @@ func WalkDir(dirPath, success, fail string) ([]string, error) {
 	var files []string
 
 	// 遍历目录
-	err := filepath.Walk(dirPath, func(filePath string, f os.FileInfo, err error) error {
+	err := filepath.WalkDir(dirPath, func(filePath string, f os.DirEntry, err error) error {
 		// 错误
 		if f == nil {
 			return err

@@ -1,14 +1,11 @@
 package cmd
 
 import (
-	"github.com/ylqjgm/AVMeta/pkg/logs"
-	"path"
-
-	"github.com/ylqjgm/AVMeta/pkg/media"
-
-	"github.com/ylqjgm/AVMeta/pkg/util"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/ylqjgm/AVMeta/pkg/media"
+	"github.com/ylqjgm/AVMeta/pkg/util"
+	"path"
 )
 
 func (e *Executor) initRoot() {
@@ -24,23 +21,30 @@ func (e *Executor) initRoot() {
 }
 
 // root命令执行函数
-func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
-	// 初始化日志
-	logs.Log("logs")
-
+func (e *Executor) rootRunFunc(c *cobra.Command, _ []string) {
 	// 获取当前执行路径
-	curDir := util.GetRunPath()
-	logs.Info("walk dir %s", curDir)
+	dir, err := c.Flags().GetString("p")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(dir) == 0 {
+		dir = util.GetRunPath()
+	}
+
+	log.Infof("walk dir %s", dir)
 
 	// 列当前目录
-	files, err := util.WalkDir(curDir, e.cfg.Path.Success, e.cfg.Path.Fail)
+	files, err := util.WalkDir(dir, e.cfg.Path.Success, e.cfg.Path.Fail)
 	// 错误日志
-	logs.FatalError(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// 获取总量
 	count := len(files)
 	// 输出总量
-	logs.Info("\n\n共探索到 %d 个视频文件, 开始刮削整理...\n", count)
+	log.Infof("共探索到 %d 个视频文件, 开始刮削整理...", count)
 
 	// 初始化进程
 	wg := util.NewWaitGroup(2)
@@ -66,7 +70,7 @@ func (e *Executor) packProcess(file string, wg *util.WaitGroup) {
 		// 恢复文件
 		util.FailFile(file, e.cfg.Path.Fail)
 
-		logs.Error("pack err: %v", err)
+		log.Errorf("pack err: %v", err)
 		// 进程
 		wg.Done()
 
@@ -74,7 +78,7 @@ func (e *Executor) packProcess(file string, wg *util.WaitGroup) {
 	}
 
 	// 输出正确
-	logs.Info("文件 [%s] 刮削成功, 来源 [%s], 路径 [%s]", path.Base(file), m.Source, m.DirPath)
+	log.Infof("文件 [%s] 刮削成功, 来源 [%s], 路径 [%s]", path.Base(file), m.Source, m.DirPath)
 
 	// 进程
 	wg.Done()

@@ -7,8 +7,8 @@ package cmd
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/ylqjgm/AVMeta/pkg/logs"
 	"github.com/ylqjgm/AVMeta/pkg/util"
 	"runtime"
 )
@@ -63,7 +63,7 @@ func (e *Executor) initConfig() {
 	cfg, err := util.GetConfig()
 	// 检查
 	if err != nil {
-		logs.FatalError(err)
+		log.Fatal(err)
 	}
 
 	// 配置信息

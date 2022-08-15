@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/ylqjgm/AVMeta/pkg/util"
@@ -34,6 +35,7 @@ func (s *JavBusScraper) Fetch(code string) error {
 	err := s.detail()
 	// 检查错误
 	if err != nil {
+		log.Errorf("proxy: %s fetch err: %v", s.Proxy, err)
 		// 设置番号
 		s.number = strings.ReplaceAll(s.number, "-", "_")
 		// 使用 _ 方式

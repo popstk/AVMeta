@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"github.com/ylqjgm/AVMeta/pkg/logs"
-	"strings"
-
-	"github.com/ylqjgm/AVMeta/pkg/actress"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/ylqjgm/AVMeta/pkg/actress"
+	"strings"
 )
 
 // actress命令
@@ -30,9 +28,6 @@ func (e *Executor) initActress() {
 
 // 头像执行命令
 func (e *Executor) actressRunFunc(cmd *cobra.Command, args []string) {
-	// 初始化日志
-	logs.Log("actress")
-
 	// 定义参数变量
 	var arg string
 	down := false
@@ -57,7 +52,7 @@ func (e *Executor) actressRunFunc(cmd *cobra.Command, args []string) {
 
 	// 是否配置了 Emby 数据
 	if e.cfg.Media.URL == "" || e.cfg.Media.API == "" {
-		logs.Fatal("Emby 访问地址或 API Key 未配置, 请配置后重试")
+		log.Fatal("Emby 访问地址或 API Key 未配置, 请配置后重试")
 	}
 
 	// 是否为入库
@@ -65,7 +60,7 @@ func (e *Executor) actressRunFunc(cmd *cobra.Command, args []string) {
 		// 初始化对象
 		actor := actress.NewActress()
 		// 入库头像
-		logs.Info("开始入库本地女优头像...")
+		log.Info("开始入库本地女优头像...")
 		// 调用入库
 		_ = actor.Put()
 
@@ -79,7 +74,7 @@ func (e *Executor) actressRunFunc(cmd *cobra.Command, args []string) {
 
 		// 检查传入参数正确性
 		if len(site) > 0 && site != actress.JAVDB && site != actress.JAVBUS {
-			logs.Fatal("--site 参数仅支持 javbus, javdb 两个选项, 留空则全部采集.")
+			log.Fatal("--site 参数仅支持 javbus, javdb 两个选项, 留空则全部采集.")
 		}
 	}
 
@@ -109,10 +104,10 @@ func fetchJavBUS() {
 	// 初始化对象
 	actor := actress.NewActress()
 	// 下载javbus有码
-	logs.Info("开始下载 JavBus 有码女优头像...")
+	log.Info("开始下载 JavBus 有码女优头像...")
 	_ = actor.Fetch("JAVBUS", 1, true)
 	// 下载javbus无码
-	logs.Info("开始下载 JavBus 无码女优头像...")
+	log.Info("开始下载 JavBus 无码女优头像...")
 	_ = actor.Fetch("JAVBUS", 1, false)
 }
 
@@ -121,9 +116,9 @@ func fetchJavDB() {
 	// 初始化对象
 	actor := actress.NewActress()
 	// 下载javdb有码
-	logs.Info("开始下载 JavDB 有码女优头像...")
+	log.Info("开始下载 JavDB 有码女优头像...")
 	_ = actor.Fetch("JAVDB", 1, true)
 	// 下载javdb无码
-	logs.Info("开始下载 JavDB 无码女优头像...")
+	log.Info("开始下载 JavDB 无码女优头像...")
 	_ = actor.Fetch("JAVDB", 1, false)
 }

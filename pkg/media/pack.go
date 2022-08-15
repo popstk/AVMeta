@@ -3,16 +3,14 @@ package media
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/ylqjgm/AVMeta/pkg/logs"
+	log "github.com/sirupsen/logrus"
+	"github.com/ylqjgm/AVMeta/pkg/scraper"
+	"github.com/ylqjgm/AVMeta/pkg/util"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/ylqjgm/AVMeta/pkg/util"
-
-	"github.com/ylqjgm/AVMeta/pkg/scraper"
 )
 
 // 刮削对象
@@ -172,7 +170,8 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 
 	// 提取番号
 	code := util.GetCode(file, cfg.Code, cfg.Path.Filter)
-	fmt.Printf("code is %s\n", code)
+	log.Infof("cfg.Base %+v", cfg.Base)
+	log.Infof("code is %s", code)
 
 	// 定义一个拥有正则匹配的刮削对象数组
 	sr := []captures{
@@ -252,7 +251,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", srcFile, code, i, scr.Name, err)
+				log.Infof("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%v", srcFile, code, i, scr.Name, err)
 			}
 		}
 	}
@@ -271,7 +270,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				logs.Info("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%s", srcFile, code, i, sc.Name, err)
+				log.Infof("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%v", srcFile, code, i, sc.Name, err)
 			}
 		}
 	}
@@ -281,7 +280,7 @@ func search(file string, cfg *util.ConfigStruct) (*Media, error) {
 		return nil, err
 	}
 
-	logs.Info("match site: %s", site)
+	log.Infof("match site: %s", site)
 
 	// 刮削并获取nfo对象
 	return ParseMedia(s, site)
