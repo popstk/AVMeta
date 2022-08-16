@@ -62,7 +62,7 @@ func GetNumberPath(replaceStr map[string]string, cfg *config.Conf) string {
 	// 多余的反斜线
 	rule = strings.ReplaceAll(rule, "//", "/")
 
-	return filepath.Join(GetRunPath(), cfg.Path.Success, rule)
+	return filepath.Join(cfg.Path.Success, rule)
 }
 
 // CheckDomainPrefix 检查域名最后是否存在斜线并返回无斜线域名

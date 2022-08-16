@@ -3,7 +3,6 @@ package cmd
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/ylqjgm/AVMeta/pkg/util"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -20,25 +19,14 @@ func (e *Executor) initClean() {
 	})
 }
 
-func (e *Executor) clean(cmd *cobra.Command, args []string) {
-	log.SetLevel(log.DebugLevel)
-
-	dir, err := cmd.Flags().GetString("p")
-	if err != nil {
-		log.Errorf("get p err: %v", err)
-		return
-	}
-
-	if len(dir) == 0 {
-		dir = util.GetRunPath()
-	}
-
+func (e *Executor) clean(_ *cobra.Command, _ []string) {
+	dir := e.WorkPath()
 	log.Infof("clean dir %s", dir)
 
 	// find non-empty dir
 	nonEmptyDir := make(map[string]struct{})
 
-	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

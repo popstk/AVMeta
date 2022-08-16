@@ -1,6 +1,9 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"github.com/ylqjgm/AVMeta/pkg/util"
+)
 
 func (e *Executor) initConfigFile() {
 	e.rootCmd.AddCommand(&cobra.Command{
@@ -11,4 +14,12 @@ func (e *Executor) initConfigFile() {
 			e.initConfig()
 		},
 	})
+}
+
+func (e *Executor) WorkPath() string {
+	if len(e.workPath) == 0 {
+		e.workPath = util.GetRunPath()
+	}
+
+	return e.workPath
 }

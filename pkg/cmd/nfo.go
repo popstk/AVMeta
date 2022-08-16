@@ -51,7 +51,7 @@ func (e *Executor) initNfo() {
 // 转换执行命令
 func (e *Executor) nfoRunFunc(cmd *cobra.Command, args []string) {
 	// 获取当前执行路径
-	curDir := util.GetRunPath()
+	curDir := e.WorkPath()
 
 	// 文件列表
 	var nfos []NfoFile

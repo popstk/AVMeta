@@ -9,7 +9,7 @@ import (
 )
 
 func (e *Executor) initRoot() {
-	e.rootCmd = &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "AVMeta",
 		Short: "一款使用 Golang 编写的跨平台 AV 元数据刮削器",
 		Long: `AVMeta 是一款使用 Golang 编写的跨平台 AV 元数据刮削器
@@ -17,21 +17,17 @@ func (e *Executor) initRoot() {
 并生成对应媒体库元数据文件`,
 		Run: e.rootRunFunc,
 	}
-	e.rootCmd.PersistentFlags().String("p", "", "设置目录")
+
+	cmd.PersistentFlags().StringVarP(&e.workPath, "path", "p", "", "设置工作目录")
+	cmd.PersistentFlags().BoolVarP(&e.verbose, "verbose", "v", false, "详细模式")
+	e.rootCmd = cmd
 }
 
 // root命令执行函数
-func (e *Executor) rootRunFunc(c *cobra.Command, _ []string) {
-	// 获取当前执行路径
-	dir, err := c.Flags().GetString("p")
-	if err != nil {
-		log.Fatal(err)
-	}
+func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
+	e.initConfig()
 
-	if len(dir) == 0 {
-		dir = util.GetRunPath()
-	}
-
+	dir := e.WorkPath()
 	log.Infof("walk dir %s", dir)
 
 	// 列当前目录

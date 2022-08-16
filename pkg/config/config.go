@@ -1,7 +1,9 @@
 package config
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"os"
 	"sort"
 )
 
@@ -48,13 +50,21 @@ type Conf struct {
 // 若没有配置文件，则创建一份默认配置文件并读取返回。
 func GetConfig() (*Conf, error) {
 	// 配置名称
-	viper.SetConfigName("config")
+	viper.SetConfigName("AVMeta")
 	// 配置类型
 	viper.SetConfigType("yaml")
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// 添加当前执行路径为配置路径
 	viper.AddConfigPath(".")
+	viper.AddConfigPath(homeDir)
+
 	// 读取配置信息
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	// 读取配置
 	if err != nil {
 		// 如果文件不存在
