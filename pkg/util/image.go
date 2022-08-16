@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/ylqjgm/AVMeta/pkg/config"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -62,7 +63,7 @@ func ConvertJPG(sourceFile, newFile string) error {
 // scrPhoto 字符串，要裁剪的图片路径，
 // newPhoto 字符串，裁剪后的图片保存路径，
 // cfg 配置信息，主要用于读取腾讯API信息。
-func PosterCover(srcPhoto, newPhoto string, cfg *ConfigStruct) error {
+func PosterCover(srcPhoto, newPhoto string, cfg *config.Conf) error {
 	// 定义各项变量
 	var width, height, x int
 	// 获取腾讯云人脸识别
@@ -115,7 +116,7 @@ func PosterCover(srcPhoto, newPhoto string, cfg *ConfigStruct) error {
 }
 
 // 腾讯云免费人脸识别
-func detectFace(photo string, cfg *ConfigStruct) (*iai.DetectFaceResponse, error) {
+func detectFace(photo string, cfg *config.Conf) (*iai.DetectFaceResponse, error) {
 	// 图片先转换为base64
 	base64, err := Base64(photo)
 	// 检查错误

@@ -38,11 +38,6 @@ func (e *Executor) clean(cmd *cobra.Command, args []string) {
 	// find non-empty dir
 	nonEmptyDir := make(map[string]struct{})
 
-	ignoreDir := map[string]struct{}{
-		"success": {},
-		"fail":    {},
-	}
-
 	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -54,7 +49,7 @@ func (e *Executor) clean(cmd *cobra.Command, args []string) {
 		}
 
 		if d.IsDir() {
-			if _, ok := ignoreDir[rel]; ok {
+			if e.cfg.InIgnoreDir(rel) {
 				return filepath.SkipDir
 			}
 
@@ -101,7 +96,7 @@ func (e *Executor) clean(cmd *cobra.Command, args []string) {
 			return err
 		}
 
-		if _, ok := ignoreDir[rel]; ok {
+		if e.cfg.InIgnoreDir(rel) {
 			return filepath.SkipDir
 		}
 

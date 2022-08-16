@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/schollz/progressbar/v2"
 	log "github.com/sirupsen/logrus"
+	"github.com/ylqjgm/AVMeta/pkg/config"
 	"github.com/ylqjgm/AVMeta/pkg/util"
 	"os"
 	"path"
@@ -23,7 +24,7 @@ const (
 // Actress 头像管理结构体
 type Actress struct {
 	// 程序配置
-	cfg *util.ConfigStruct
+	cfg *config.Conf
 	// Emby 媒体库API对象
 	emby *Emby
 }
@@ -33,7 +34,7 @@ type Actress struct {
 // 配置文件读取失败则返回空对象。
 func NewActress() *Actress {
 	// 获取配置信息
-	cfg, err := util.GetConfig()
+	cfg, err := config.GetConfig()
 	// 检查
 	log.Fatal(err)
 

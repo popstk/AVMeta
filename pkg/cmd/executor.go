@@ -9,7 +9,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/ylqjgm/AVMeta/pkg/util"
+	"github.com/ylqjgm/AVMeta/pkg/config"
 	"runtime"
 )
 
@@ -19,7 +19,7 @@ var site string
 // Executor 命令对象
 type Executor struct {
 	rootCmd *cobra.Command
-	cfg     *util.ConfigStruct
+	cfg     *config.Conf
 
 	version   string
 	commit    string
@@ -60,7 +60,7 @@ func (e *Executor) Execute() error {
 // 初始化配置
 func (e *Executor) initConfig() {
 	// 获取配置
-	cfg, err := util.GetConfig()
+	cfg, err := config.GetConfig()
 	// 检查
 	if err != nil {
 		log.Fatal(err)

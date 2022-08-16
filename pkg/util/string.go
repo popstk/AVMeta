@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/ylqjgm/AVMeta/pkg/config"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -44,7 +45,7 @@ func GetCode(filename string, regs, filters []string) string {
 //
 // replaceStr map对象，通过转换后的媒体各项数据，
 // cfg 配置信息，用以读取保存路径规则。
-func GetNumberPath(replaceStr map[string]string, cfg *ConfigStruct) string {
+func GetNumberPath(replaceStr map[string]string, cfg *config.Conf) string {
 	// 获取保存规则
 	rule := cfg.Path.Directory
 	// 循环替换

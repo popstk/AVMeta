@@ -1,4 +1,4 @@
-package util
+package config
 
 import (
 	"github.com/spf13/viper"
@@ -33,18 +33,20 @@ type SiteStruct struct {
 	JavDB  string // javdb免翻地址
 }
 
-// ConfigStruct 程序配置信息结构
-type ConfigStruct struct {
+// Conf 程序配置信息结构
+type Conf struct {
 	Base  BaseStruct  // 基础配置
 	Path  PathStruct  // 路径配置
 	Media MediaStruct // 媒体库配置
 	Site  SiteStruct  // 免翻地址配置
 	Code  []string    // 优先匹配番号
+
+	IgnoreDir map[string]struct{} `yaml:"-"`
 }
 
 // GetConfig 读取配置信息，返回配置信息对象，
 // 若没有配置文件，则创建一份默认配置文件并读取返回。
-func GetConfig() (*ConfigStruct, error) {
+func GetConfig() (*Conf, error) {
 	// 配置名称
 	viper.SetConfigName("config")
 	// 配置类型
@@ -65,7 +67,7 @@ func GetConfig() (*ConfigStruct, error) {
 	}
 
 	// 定义配置变量
-	var config ConfigStruct
+	var config Conf
 
 	// 反序列
 	err = viper.Unmarshal(&config)
@@ -84,7 +86,7 @@ func GetConfig() (*ConfigStruct, error) {
 
 // WriteConfig 在程序执行路径下写入一份默认配置文件，
 // 若写入成功则返回配置信息，若写入失败，则返回错误信息。
-func WriteConfig() (*ConfigStruct, error) {
+func WriteConfig() (*Conf, error) {
 	// 配置名称
 	viper.SetConfigName("config")
 	// 配置类型
@@ -93,7 +95,7 @@ func WriteConfig() (*ConfigStruct, error) {
 	viper.AddConfigPath(".")
 
 	// 默认配置
-	cfg := &ConfigStruct{
+	cfg := &Conf{
 		Base: BaseStruct{
 			Proxy: "",
 		},
@@ -124,4 +126,15 @@ func WriteConfig() (*ConfigStruct, error) {
 	viper.Set("code", cfg.Code)
 
 	return cfg, viper.SafeWriteConfig()
+}
+
+func (c *Conf) Init() {
+	c.IgnoreDir = make(map[string]struct{})
+	c.IgnoreDir[c.Path.Success] = struct{}{}
+	c.IgnoreDir[c.Path.Fail] = struct{}{}
+}
+
+func (c *Conf) InIgnoreDir(dir string) bool {
+	_, ok := c.IgnoreDir[dir]
+	return ok
 }

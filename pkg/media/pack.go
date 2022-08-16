@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"github.com/ylqjgm/AVMeta/pkg/config"
 	"github.com/ylqjgm/AVMeta/pkg/scraper"
 	"github.com/ylqjgm/AVMeta/pkg/util"
 	"os"
@@ -25,7 +26,7 @@ type captures struct {
 //
 // file 字符串参数，传入要整理的文件路径，
 // cfg ConfigStruct结构体，传入程序配置信息。
-func Pack(file string, cfg *util.ConfigStruct) (*Media, error) {
+func Pack(file string, cfg *config.Conf) (*Media, error) {
 	if cfg.Media.Library == "vsmeta" {
 		return packVSMeta(file, cfg)
 	}
@@ -38,7 +39,7 @@ func Pack(file string, cfg *util.ConfigStruct) (*Media, error) {
 //
 // file 字符串参数，传入要整理的文件路径，
 // cfg ConfigStruct结构体，传入程序配置信息。
-func packNfo(file string, cfg *util.ConfigStruct) (*Media, error) {
+func packNfo(file string, cfg *config.Conf) (*Media, error) {
 	// 获取采集数据
 	m, err := capture(file, cfg)
 	// 检查
@@ -73,7 +74,7 @@ func packNfo(file string, cfg *util.ConfigStruct) (*Media, error) {
 //
 // file 字符串参数，传入要整理的文件路径，
 // cfg ConfigStruct结构体，传入程序配置信息。
-func packVSMeta(file string, cfg *util.ConfigStruct) (*Media, error) {
+func packVSMeta(file string, cfg *config.Conf) (*Media, error) {
 	// 获取整理数据
 	m, err := capture(file, cfg)
 	// 检查
@@ -115,7 +116,7 @@ func packVSMeta(file string, cfg *util.ConfigStruct) (*Media, error) {
 //
 // file 字符串参数，传入要整理的文件路径，
 // cfg ConfigStruct结构体，传入程序配置信息。
-func capture(file string, cfg *util.ConfigStruct) (*Media, error) {
+func capture(file string, cfg *config.Conf) (*Media, error) {
 	// 搜索番号并获得刮削对象
 	m, err := search(file, cfg)
 	// 检查
@@ -164,7 +165,7 @@ func capture(file string, cfg *util.ConfigStruct) (*Media, error) {
 }
 
 // 番号搜索
-func search(file string, cfg *util.ConfigStruct) (*Media, error) {
+func search(file string, cfg *config.Conf) (*Media, error) {
 	// 定义变量
 	var err error
 
