@@ -5,7 +5,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/ylqjgm/AVMeta/pkg/media"
 	"github.com/ylqjgm/AVMeta/pkg/util"
+	"io/fs"
 	"path"
+	"path/filepath"
+	"strings"
 )
 
 func (e *Executor) initRoot() {
@@ -29,20 +32,8 @@ func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
 	e.initLog()
 	e.initConfig()
 
-	dir := e.WorkPath()
-	log.Infof("扫描目录 %s", dir)
-
-	// 列当前目录
-	files, err := util.WalkDir(dir, e.cfg.Path.Success, e.cfg.Path.Fail)
-	// 错误日志
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// 获取总量
-	count := len(files)
-	// 输出总量
-	log.Infof("共探索到 %d 个视频文件, 开始刮削整理...", count)
+	files := e.findFiles()
+	log.Infof("共探索到 %d 个视频文件, 开始刮削整理...", len(files))
 
 	// 初始化进程
 	wg := util.NewWaitGroup(2)
@@ -57,6 +48,44 @@ func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
 
 	// 等待结束
 	wg.Wait()
+}
+
+func (e *Executor) findFiles() []string {
+	dir := e.WorkPath()
+	log.Infof("扫描目录 %s", dir)
+
+	var files []string
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		rel, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			if e.InIgnoreDir(rel) {
+				return filepath.SkipDir
+			}
+
+			return nil
+		}
+
+		ext := strings.ToLower(filepath.Ext(path))
+		if _, ok := videoExts[ext]; ok {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return files
 }
 
 // 刮削进程

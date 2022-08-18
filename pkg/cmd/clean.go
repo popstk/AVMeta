@@ -127,7 +127,7 @@ func (e *Executor) clean(c *cobra.Command, _ []string) {
 	}
 
 	for _, p := range SortDir(removeDir) {
-		log.Infof("remove dir %s", p)
+		log.Infof(">>> remove dir: %s", p)
 		if force {
 			if err := os.RemoveAll(p); err != nil {
 				log.Errorf("err: %v", err)

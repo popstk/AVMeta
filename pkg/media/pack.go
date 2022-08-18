@@ -171,8 +171,7 @@ func search(file string, cfg *config.Conf) (*Media, error) {
 
 	// 提取番号
 	code := util.GetCode(file, cfg.Code, cfg.Path.Filter)
-	log.Infof("cfg.Base %+v", cfg.Base)
-	log.Infof("code is %s", code)
+	log.Infof("search code is %s", code)
 
 	// 定义一个拥有正则匹配的刮削对象数组
 	sr := []captures{
@@ -252,7 +251,7 @@ func search(file string, cfg *config.Conf) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				log.Infof("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%v", srcFile, code, i, scr.Name, err)
+				log.Infof("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%v", srcFile, code, i, site, err)
 			}
 		}
 	}
@@ -271,7 +270,7 @@ func search(file string, cfg *config.Conf) (*Media, error) {
 			if err = s.Fetch(code); err == nil {
 				break
 			} else {
-				log.Infof("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%v", srcFile, code, i, sc.Name, err)
+				log.Infof("文件 [%s -> %s] 第 %d 次刮削失败，刮削来源：[%s]，错误原因：%v", srcFile, code, i, site, err)
 			}
 		}
 	}
