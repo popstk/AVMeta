@@ -27,8 +27,9 @@ type Executor struct {
 	goVersion string
 	platform  string
 
-	workPath string // 工作目录
-	verbose  bool   // 详细模式
+	workPath   string // 工作目录
+	configFile string // 配置文件
+	verbose    bool   // 详细模式
 }
 
 // NewExecutor 返回一个被初始化的命令对象。
