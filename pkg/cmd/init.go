@@ -1,8 +1,9 @@
 package cmd
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/ylqjgm/AVMeta/pkg/util"
+	"os"
 )
 
 func (e *Executor) initConfigFile() {
@@ -18,7 +19,11 @@ func (e *Executor) initConfigFile() {
 
 func (e *Executor) WorkPath() string {
 	if len(e.workPath) == 0 {
-		e.workPath = util.GetRunPath()
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		e.workPath = dir
 	}
 
 	return e.workPath
