@@ -11,22 +11,32 @@ import (
 )
 
 func (e *Executor) initClean() {
-	e.rootCmd.AddCommand(&cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "clean",
 		Short: "文件和目录情况",
 		Long:  `按照规则清理无用的目录`,
 		Run:   e.clean,
-	})
+	}
+	cmd.Flags().BoolP("force", "f", false, "执行清理")
+	e.rootCmd.AddCommand(cmd)
 }
 
-func (e *Executor) clean(_ *cobra.Command, _ []string) {
+func (e *Executor) clean(c *cobra.Command, _ []string) {
+	e.initLog()
+	e.initConfig()
+
+	force, err := c.Flags().GetBool("force")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	dir := e.WorkPath()
-	log.Infof("clean dir %s", dir)
+	log.Infof("扫描目录 %s", dir)
 
 	// find non-empty dir
 	nonEmptyDir := make(map[string]struct{})
 
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -110,8 +120,10 @@ func (e *Executor) clean(_ *cobra.Command, _ []string) {
 
 	for _, p := range removeDir {
 		log.Infof("remove dir %s", p)
-		if err := os.RemoveAll(p); err != nil {
-			log.Errorf("err: %v", err)
+		if force {
+			if err := os.RemoveAll(p); err != nil {
+				log.Errorf("err: %v", err)
+			}
 		}
 	}
 }

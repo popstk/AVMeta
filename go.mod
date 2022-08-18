@@ -9,7 +9,6 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
-	github.com/tencentcloud/tencentcloud-sdk-go v3.0.126+incompatible
 	golang.org/x/net v0.0.0-20200421231249-e086a090c8fd
 	golang.org/x/text v0.3.2
 )

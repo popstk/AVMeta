@@ -26,10 +26,11 @@ func (e *Executor) initRoot() {
 
 // root命令执行函数
 func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
+	e.initLog()
 	e.initConfig()
 
 	dir := e.WorkPath()
-	log.Infof("walk dir %s", dir)
+	log.Infof("扫描目录 %s", dir)
 
 	// 列当前目录
 	files, err := util.WalkDir(dir, e.cfg.Path.Success, e.cfg.Path.Fail)

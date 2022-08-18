@@ -28,3 +28,9 @@ func (e *Executor) WorkPath() string {
 
 	return e.workPath
 }
+
+func (e *Executor) initLog() {
+	if e.verbose {
+		log.SetLevel(log.DebugLevel)
+	}
+}
