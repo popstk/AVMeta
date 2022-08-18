@@ -47,16 +47,24 @@ func (e *Executor) clean(c *cobra.Command, _ []string) {
 		}
 
 		if d.IsDir() {
-			if e.cfg.InIgnoreDir(rel) {
+			if e.InIgnoreDir(rel) {
 				return filepath.SkipDir
 			}
 
 			return nil
 		}
 
-		ext := strings.ToLower(filepath.Ext(d.Name()))
-		if _, ok := videoExts[ext]; !ok {
-			return nil
+		fileInfo, err := d.Info()
+		if err != nil {
+			return err
+		}
+
+		// 小于1m且不是特定扩展名就可以删除
+		if fileInfo.Size() < 1024*1024 {
+			ext := strings.ToLower(filepath.Ext(d.Name()))
+			if _, ok := videoExts[ext]; !ok {
+				return nil
+			}
 		}
 
 		relDir := filepath.Dir(rel)
@@ -94,7 +102,7 @@ func (e *Executor) clean(c *cobra.Command, _ []string) {
 			return err
 		}
 
-		if e.cfg.InIgnoreDir(rel) {
+		if e.InIgnoreDir(rel) {
 			return filepath.SkipDir
 		}
 
@@ -114,11 +122,11 @@ func (e *Executor) clean(c *cobra.Command, _ []string) {
 		return
 	}
 
-	sort.Slice(removeDir, func(i, j int) bool {
-		return len(removeDir[i]) > len(removeDir[j])
-	})
+	if len(removeDir) == 0 {
+		return
+	}
 
-	for _, p := range removeDir {
+	for _, p := range SortDir(removeDir) {
 		log.Infof("remove dir %s", p)
 		if force {
 			if err := os.RemoveAll(p); err != nil {
@@ -126,4 +134,28 @@ func (e *Executor) clean(c *cobra.Command, _ []string) {
 			}
 		}
 	}
+}
+
+func SortDir(list []string) []string {
+	if len(list) <= 1 {
+		return list
+	}
+
+	sort.Slice(list, func(i, j int) bool {
+		return list[i] < list[j]
+	})
+
+	ret := []string{list[0]}
+	last := list[0]
+	for i := 1; i < len(list); i++ {
+		val := list[i]
+		if strings.HasPrefix(val, last) {
+			continue
+		}
+
+		last = val
+		ret = append(ret, val)
+	}
+
+	return ret
 }

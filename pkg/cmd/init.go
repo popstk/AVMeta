@@ -3,6 +3,7 @@ package cmd
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	jww "github.com/spf13/jwalterweatherman"
 	"os"
 )
 
@@ -32,5 +33,7 @@ func (e *Executor) WorkPath() string {
 func (e *Executor) initLog() {
 	if e.verbose {
 		log.SetLevel(log.DebugLevel)
+		log.SetReportCaller(true)
+		jww.SetStdoutThreshold(jww.LevelTrace)
 	}
 }

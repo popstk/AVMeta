@@ -46,29 +46,30 @@ type Conf struct {
 	IgnoreDir map[string]struct{} `yaml:"-"`
 }
 
-// GetConfig 读取配置信息，返回配置信息对象，
-// 若没有配置文件，则创建一份默认配置文件并读取返回。
-func GetConfig() (*Conf, error) {
-	// 配置名称
-	viper.SetConfigName("AVMeta")
-	// 配置类型
-	viper.SetConfigType("yaml")
-
+func SetDefaultConfigFile() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// 添加当前执行路径为配置路径
-	viper.AddConfigPath(".")
 	viper.AddConfigPath(homeDir)
+	viper.SetConfigName(".AVMeta")
+	viper.SetConfigType("yaml")
+}
 
-	// 读取配置信息
-	err = viper.ReadInConfig()
-	// 读取配置
+// GetConfig 读取配置信息，返回配置信息对象，
+// 若没有配置文件，则创建一份默认配置文件并读取返回。
+func GetConfig(configFile string) (*Conf, error) {
+	if len(configFile) > 0 {
+		viper.SetConfigFile(configFile)
+	} else {
+		SetDefaultConfigFile()
+	}
+
+	err := viper.ReadInConfig()
 	if err != nil {
-		// 如果文件不存在
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Infof("初始化配置文件")
 			return WriteConfig()
 		}
 
@@ -97,12 +98,7 @@ func GetConfig() (*Conf, error) {
 // WriteConfig 在程序执行路径下写入一份默认配置文件，
 // 若写入成功则返回配置信息，若写入失败，则返回错误信息。
 func WriteConfig() (*Conf, error) {
-	// 配置名称
-	viper.SetConfigName("config")
-	// 配置类型
-	viper.SetConfigType("yaml")
-	// 添加当前执行路径为配置路径
-	viper.AddConfigPath(".")
+	SetDefaultConfigFile()
 
 	// 默认配置
 	cfg := &Conf{
@@ -122,10 +118,7 @@ func WriteConfig() (*Conf, error) {
 			SecretID:  "",
 			SecretKey: "",
 		},
-		Site: SiteStruct{
-			JavBus: "https://www.javbus.com/",
-			JavDB:  "https://javdb4.com/",
-		},
+		Site: SiteStruct{},
 	}
 
 	// 设置数据
@@ -136,15 +129,4 @@ func WriteConfig() (*Conf, error) {
 	viper.Set("code", cfg.Code)
 
 	return cfg, viper.SafeWriteConfig()
-}
-
-func (c *Conf) Init() {
-	c.IgnoreDir = make(map[string]struct{})
-	c.IgnoreDir[c.Path.Success] = struct{}{}
-	c.IgnoreDir[c.Path.Fail] = struct{}{}
-}
-
-func (c *Conf) InIgnoreDir(dir string) bool {
-	_, ok := c.IgnoreDir[dir]
-	return ok
 }

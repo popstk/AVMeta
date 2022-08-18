@@ -30,6 +30,8 @@ type Executor struct {
 	workPath   string // 工作目录
 	configFile string // 配置文件
 	verbose    bool   // 详细模式
+
+	ignoreDir map[string]struct{}
 }
 
 // NewExecutor 返回一个被初始化的命令对象。
@@ -63,7 +65,7 @@ func (e *Executor) Execute() error {
 // 初始化配置
 func (e *Executor) initConfig() {
 	// 获取配置
-	cfg, err := config.GetConfig()
+	cfg, err := config.GetConfig(e.configFile)
 	// 检查
 	if err != nil {
 		log.Fatal(err)
@@ -71,4 +73,22 @@ func (e *Executor) initConfig() {
 
 	// 配置信息
 	e.cfg = cfg
+	e.Init()
+}
+
+func (e *Executor) Init() {
+	c := e.cfg
+	ignoreDir := make(map[string]struct{})
+	ignoreDir[c.Path.Success] = struct{}{}
+	ignoreDir[c.Path.Fail] = struct{}{}
+	e.ignoreDir = ignoreDir
+}
+
+func (e *Executor) InIgnoreDir(dir string) bool {
+	if len(e.ignoreDir) > 0 {
+		_, ok := e.ignoreDir[dir]
+		return ok
+	}
+
+	return false
 }

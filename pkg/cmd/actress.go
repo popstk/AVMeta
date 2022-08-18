@@ -28,6 +28,8 @@ func (e *Executor) initActress() {
 
 // 头像执行命令
 func (e *Executor) actressRunFunc(cmd *cobra.Command, args []string) {
+	e.initConfig()
+
 	// 定义参数变量
 	var arg string
 	down := false
@@ -58,7 +60,7 @@ func (e *Executor) actressRunFunc(cmd *cobra.Command, args []string) {
 	// 是否为入库
 	if !down {
 		// 初始化对象
-		actor := actress.NewActress()
+		actor := actress.NewActress(e.cfg)
 		// 入库头像
 		log.Info("开始入库本地女优头像...")
 		// 调用入库
@@ -83,26 +85,26 @@ func (e *Executor) actressRunFunc(cmd *cobra.Command, args []string) {
 		// 仅javBUS
 		if site == actress.JAVBUS {
 			// 下载javBUS
-			fetchJavBUS()
+			e.fetchJavBUS()
 			return
 		}
 
 		// 仅javDB
 		if site == actress.JAVDB {
 			// 下载javDB
-			fetchJavDB()
+			e.fetchJavDB()
 			return
 		}
 
-		fetchJavBUS()
-		fetchJavDB()
+		e.fetchJavBUS()
+		e.fetchJavDB()
 	}
 }
 
 // 下载javBUS
-func fetchJavBUS() {
+func (e *Executor) fetchJavBUS() {
 	// 初始化对象
-	actor := actress.NewActress()
+	actor := actress.NewActress(e.cfg)
 	// 下载javbus有码
 	log.Info("开始下载 JavBus 有码女优头像...")
 	_ = actor.Fetch("JAVBUS", 1, true)
@@ -112,9 +114,9 @@ func fetchJavBUS() {
 }
 
 // 下载javDB
-func fetchJavDB() {
+func (e *Executor) fetchJavDB() {
 	// 初始化对象
-	actor := actress.NewActress()
+	actor := actress.NewActress(e.cfg)
 	// 下载javdb有码
 	log.Info("开始下载 JavDB 有码女优头像...")
 	_ = actor.Fetch("JAVDB", 1, true)

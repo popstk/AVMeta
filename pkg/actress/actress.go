@@ -32,12 +32,7 @@ type Actress struct {
 // NewActress 返回一个Actress对象。
 // 引用util.GetConfig方法读取配置文件，
 // 配置文件读取失败则返回空对象。
-func NewActress() *Actress {
-	// 获取配置信息
-	cfg, err := config.GetConfig()
-	// 检查
-	log.Fatal(err)
-
+func NewActress(cfg *config.Conf) *Actress {
 	return &Actress{
 		cfg:  cfg,
 		emby: NewEmby(cfg.Media.URL, cfg.Media.API),

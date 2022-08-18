@@ -18,8 +18,8 @@ func (e *Executor) initRoot() {
 		Run: e.rootRunFunc,
 	}
 
-	cmd.PersistentFlags().StringVarP(&e.workPath, "path", "p", "", "设置工作目录")
-	cmd.PersistentFlags().StringVarP(&e.configFile, "config", "c", "", "配置文件目录")
+	cmd.PersistentFlags().StringVarP(&e.workPath, "path", "p", "", "设置扫描目录")
+	cmd.PersistentFlags().StringVarP(&e.configFile, "config", "c", "", "指定配置文件")
 	cmd.PersistentFlags().BoolVarP(&e.verbose, "verbose", "v", false, "详细模式")
 	e.rootCmd = cmd
 }
