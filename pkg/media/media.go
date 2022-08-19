@@ -179,24 +179,24 @@ func (m *Media) ConvertMap() map[string]string {
 	}
 	// 是否有演员
 	if len(actors) > 0 {
-		replaceMap["{actor}"] = actors[0]
+		replaceMap["actor"] = actors[0]
 	} else {
-		replaceMap["{actor}"] = "未知演员"
+		replaceMap["actor"] = "未知演员"
 	}
 	// 替换演员名单
-	replaceMap["{actors}"] = strings.Join(actors, ",")
+	replaceMap["actors"] = strings.Join(actors, ",")
 	// 替换番号
-	replaceMap["{number}"] = m.Number
+	replaceMap["number"] = m.Number
 	// 替换发行时间
-	replaceMap["{release}"] = m.Release
+	replaceMap["release"] = m.Release
 	// 替换年份
-	replaceMap["{year}"] = m.Year
+	replaceMap["year"] = m.Year
 	// 替换月份
-	replaceMap["{month}"] = m.Month
+	replaceMap["month"] = m.Month
 	// 替换影片公司
-	replaceMap["{studio}"] = m.Studio.Inner
+	replaceMap["studio"] = m.Studio.Inner
 	// 替换影片名称
-	replaceMap["{title}"] = m.Title.Inner
+	replaceMap["title"] = m.Title.Inner
 
 	return replaceMap
 }

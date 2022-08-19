@@ -126,18 +126,16 @@ func capture(file string, cfg *config.Conf) (*Media, error) {
 
 	// 是否有图片
 	if m.Cover == "" {
-		return nil, fmt.Errorf("找不到封面")
+		return nil, fmt.Errorf("[site:%s]找不到封面", m.Source)
 	}
 
 	// 获取准确目录
-	dirPath := util.GetNumberPath(m.ConvertMap(), cfg)
-	// 创建目录
+	tags := AppendTagFromFileName(m.ConvertMap(), file)
+	dirPath := util.GetNumberPath(tags, cfg)
 	err = os.MkdirAll(dirPath, os.ModePerm)
-	// 检查
 	if err != nil {
 		return nil, err
 	}
-	// 赋值保存路径
 	m.DirPath = dirPath
 
 	// 获取图片后缀
@@ -280,8 +278,6 @@ func search(file string, cfg *config.Conf) (*Media, error) {
 		return nil, err
 	}
 
-	log.Infof("match site: %s", site)
-
 	// 刮削并获取nfo对象
 	return ParseMedia(s, site)
 }
@@ -299,4 +295,19 @@ func mediaToXML(m *Media) ([]byte, error) {
 	x = []byte(xml.Header + string(x))
 
 	return x, nil
+}
+
+// AppendTagFromFileName 追加附加的额外标签
+func AppendTagFromFileName(tags map[string]string, file string) map[string]string {
+	fileName := strings.ToLower(filepath.Base(file))
+	if len(tags) == 0 {
+		tags = make(map[string]string)
+	}
+
+	// uncensored
+	if strings.Contains(fileName, "uncensored") || strings.Contains(fileName, "流出") {
+		tags["uncensored"] = "uncensored"
+	}
+
+	return tags
 }

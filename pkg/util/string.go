@@ -50,7 +50,7 @@ func GetNumberPath(replaceStr map[string]string, cfg *config.Conf) string {
 	rule := cfg.Path.Directory
 	// 循环替换
 	for key, val := range replaceStr {
-		rule = strings.ReplaceAll(rule, key, val)
+		rule = strings.ReplaceAll(rule, "{"+key+"}", val)
 	}
 
 	// 定义特殊字符数组
