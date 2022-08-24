@@ -62,7 +62,13 @@ func GetNumberPath(replaceStr map[string]string, cfg *config.Conf) string {
 	// 多余的反斜线
 	rule = strings.ReplaceAll(rule, "//", "/")
 
-	return filepath.Join(cfg.Path.Success, rule)
+	// 目录名裁剪
+	paths := filepath.SplitList(rule)
+	for i, p := range paths {
+		paths[i] = MaxName(p)
+	}
+
+	return filepath.Join(cfg.Path.Success, filepath.Join(paths...))
 }
 
 // CheckDomainPrefix 检查域名最后是否存在斜线并返回无斜线域名
@@ -99,4 +105,22 @@ func IntroFilter(intro string) string {
 
 	// 清除多余空白
 	return strings.TrimSpace(intro)
+}
+
+const MaxBytes = 255
+
+func MaxName(name string) string {
+	if len(name) <= MaxBytes {
+		return name
+	}
+
+	last := 0
+	for i := range name {
+		if i > MaxBytes {
+			break
+		}
+		last = i
+	}
+
+	return name[:last]
 }

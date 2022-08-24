@@ -1,13 +1,13 @@
 package scraper
 
 import (
+	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	"github.com/ylqjgm/AVMeta/pkg/util"
 	"golang.org/x/net/html"
 	"net/http"
 	"strings"
-	"time"
-
-	"github.com/ylqjgm/AVMeta/pkg/util"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -32,21 +32,28 @@ func NewSiroScraper(proxy string) *SiroScraper {
 func (s *SiroScraper) Fetch(code string) error {
 	// 设置番号
 	s.number = strings.ToUpper(code)
-	// 定义Cookies
+
 	var cookies []*http.Cookie
-	// 加入Cookie
 	cookies = append(cookies, &http.Cookie{
-		Name:    "adc",
-		Value:   "1",
-		Path:    "/",
-		Domain:  "mgstage.com",
-		Expires: time.Now().Add(1 * time.Hour),
+		Name:   "adc",
+		Value:  "1",
+		Path:   "/",
+		Domain: ".mgstage.com",
 	})
-	// 组合地址
+
 	uri := fmt.Sprintf("https://www.mgstage.com/product/product_detail/%s/", s.number)
-	// 打开链接
-	root, err := util.GetRoot(uri, s.Proxy, cookies)
-	// 检查
+
+	// 执行请求
+	data, status, err := util.MakeRequest("GET", uri, s.Proxy, nil, nil, cookies)
+	if err != nil {
+		return err
+	}
+
+	if status >= http.StatusBadRequest {
+		return fmt.Errorf("%s [Http Status]: %d", uri, status)
+	}
+
+	root, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -119,9 +126,13 @@ func (s *SiroScraper) GetTags() []string {
 // GetCover 获取图片
 func (s *SiroScraper) GetCover() string {
 	// 获取图片
-	fanart, _ := s.root.Find(`#EnlargeImage`).Attr("href")
+	cover, exist := s.root.Find(`#EnlargeImage`).Attr("href")
+	if !exist {
+		ret, err := s.root.Html()
+		log.Errorf("root err: %v text: %s", err, ret)
+	}
 
-	return fanart
+	return cover
 }
 
 // GetActors 获取演员

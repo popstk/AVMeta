@@ -203,11 +203,13 @@ func search(file string, cfg *config.Conf) (*Media, error) {
 			S:    scraper.NewSiroScraper(cfg.Base.Proxy),
 			R:    regexp.MustCompile(`^(siro|abp|[0-9]{3,4}[a-zA-Z]{2,5})-[0-9]{3,4}`),
 		},
-		{
-			Name: "DMM",
-			S:    scraper.NewDMMScraper(cfg.Base.Proxy),
-			R:    regexp.MustCompile(`[a-zA-Z]{2,5}[-|\s\S][0-9]{3,4}`),
-		},
+		/*
+			{
+				Name: "DMM",
+				S:    scraper.NewDMMScraper(cfg.Base.Proxy),
+				R:    regexp.MustCompile(`[a-zA-Z]{2,5}[-|\s\S][0-9]{3,4}`),
+			},
+		*/
 	}
 	// 定义一个没有正则匹配的刮削对象数组
 	ss := []captures{
@@ -306,7 +308,9 @@ func AppendTagFromFileName(tags map[string]string, file string) map[string]strin
 
 	// uncensored
 	if strings.Contains(fileName, "uncensored") || strings.Contains(fileName, "流出") {
-		tags["uncensored"] = "uncensored"
+		tags["uncensored"] = "[uncensored]"
+	} else {
+		tags["uncensored"] = ""
 	}
 
 	return tags

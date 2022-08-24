@@ -4,17 +4,23 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+)
 
-	"github.com/PuerkitoBio/goquery"
+const (
+	UserAgent      = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Mobile Safari/537.36"
+	DefaultTimeOut = 15 * time.Second
+	RetryTime      = 3
 )
 
 // MakeRequest 创建一个远程请求对象
@@ -33,14 +39,8 @@ import (
 // data 字节集，返回读取到的内容字节集，
 // status 整数，返回请求状态码，
 // err 错误信息。
-func MakeRequest(
-	method, uri, proxy string,
-	body io.Reader,
-	header map[string]string,
-	cookies []*http.Cookie) (
-	data []byte,
-	status int,
-	err error) {
+func MakeRequest(method, uri, proxy string, body io.Reader, header map[string]string, cookies []*http.Cookie) (
+	data []byte, status int, err error) {
 	// 构建请求客户端
 	client := createHTTPClient(proxy)
 
@@ -52,20 +52,54 @@ func MakeRequest(
 	}
 
 	// 执行请求
-	res, err := client.Do(req)
-	// 检查错误
-	if err != nil {
-		return nil, 0, fmt.Errorf("%s [Request]: %s", uri, err)
+	var res *http.Response
+	for i := 0; i < RetryTime; i++ {
+
+		PrintRequest(req)
+		res, err = client.Do(req)
+		if err != nil {
+			log.Errorf("[retry %d]http err: %v", i+1, err)
+			continue
+		}
+		PrintRespond(res)
+
+		status = res.StatusCode
+		data, err = io.ReadAll(res.Body)
+		if err != nil {
+			log.Errorf("[retry %d]read body err: %v", i+1, err)
+			continue
+		}
+		// 关闭请求连接
+		_ = res.Body.Close()
 	}
 
-	// 获取请求状态码
-	status = res.StatusCode
-	// 读取请求内容
-	data, err = ioutil.ReadAll(res.Body)
-	// 关闭请求连接
-	_ = res.Body.Close()
+	return
+}
 
-	return data, status, err
+func PrintRequest(r *http.Request) {
+	if log.GetLevel() > log.DebugLevel {
+		return
+	}
+
+	dump, err := httputil.DumpRequestOut(r, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Debugf("request: %s", string(dump))
+}
+
+func PrintRespond(r *http.Response) {
+	if log.GetLevel() > log.DebugLevel {
+		return
+	}
+
+	dump, err := httputil.DumpResponse(r, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Debugf("respond: %s", string(dump))
 }
 
 // GetResult 获取远程字节集数据，并返回字节集数据及错误信息
@@ -76,10 +110,7 @@ func MakeRequest(
 func GetResult(uri, proxy string, cookies []*http.Cookie) ([]byte, error) {
 	// 头部定义
 	header := make(map[string]string)
-	// 加入头部信息
-	header["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-		"AppleWebKit/537.36 (KHTML, like Gecko) " +
-		"Chrome/68.0.3440.106 Safari/537.36"
+	header["User-Agent"] = UserAgent
 	header["referer"] = uri
 
 	// 执行请求
@@ -192,32 +223,23 @@ func createHTTPClient(proxy string) *http.Client {
 	// 返回客户端
 	return &http.Client{
 		Transport: transport,
-		Timeout:   60 * time.Second,
+		Timeout:   DefaultTimeOut,
 	}
 }
 
 // 创建请求对象
 func createRequest(method, uri string, body io.Reader, header map[string]string, cookies []*http.Cookie) (*http.Request, error) {
-	// 新建请求
 	req, err := http.NewRequest(method, uri, body)
-	// 检查错误
 	if err != nil {
 		return nil, fmt.Errorf("%s [Request]: %s", uri, err)
 	}
 
-	// 循环头部信息
 	for k, v := range header {
-		// 设置头部
 		req.Header.Set(k, v)
 	}
 
-	// 设置了cookie
-	if len(cookies) > 0 {
-		// 循环cookie
-		for _, cookie := range cookies {
-			// 加入cookie
-			req.AddCookie(cookie)
-		}
+	for _, cookie := range cookies {
+		req.AddCookie(cookie)
 	}
 
 	return req, err
