@@ -87,6 +87,19 @@ func FindFromText(r *html.Node, expr string) string {
 	return htmlquery.InnerText(node)
 }
 
+func FindListFromText(r *html.Node, expr string) []string {
+	nodes := htmlquery.Find(r, expr)
+	if len(nodes) == 0 {
+		return nil
+	}
+	result := make([]string, 0, len(nodes))
+	for _, node := range nodes {
+		result = append(result, htmlquery.InnerText(node))
+	}
+
+	return result
+}
+
 // GetTitle 获取名称
 func (s *FC2Scraper) GetTitle() string {
 	return FindFromText(s.fc2Root, exprTitle)

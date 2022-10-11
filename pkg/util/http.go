@@ -42,7 +42,7 @@ const (
 func MakeRequest(method, uri, proxy string, body io.Reader, header map[string]string, cookies []*http.Cookie) (
 	data []byte, status int, err error) {
 	// 构建请求客户端
-	client := createHTTPClient(proxy)
+	client := NewProxyClient(proxy)
 
 	// 创建请求对象
 	req, err := createRequest(method, uri, body, header, cookies)
@@ -203,7 +203,7 @@ func SavePhoto(uri, savePath, proxy string, needConvert bool) error {
 }
 
 // 创建http客户端
-func createHTTPClient(proxy string) *http.Client {
+func NewProxyClient(proxy string) *http.Client {
 	// 初始化
 	transport := &http.Transport{
 		/* #nosec */
@@ -284,4 +284,34 @@ func saveFile(savePath string, data []byte, length int64) error {
 	}
 
 	return err
+}
+
+type Response struct {
+	Respond *http.Response
+	Body    []byte
+}
+
+func HttpGet(c *http.Client, uri string) (*Response, error) {
+	if c == nil {
+		c = http.DefaultClient
+	}
+
+	rsp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := io.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := rsp.Body.Close(); err != nil {
+		return nil, err
+	}
+
+	return &Response{
+		Respond: rsp,
+		Body:    data,
+	}, nil
 }
