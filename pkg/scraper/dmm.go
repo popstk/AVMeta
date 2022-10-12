@@ -57,7 +57,7 @@ func GetDmmIntro(code, proxy string) string {
 		return ""
 	}
 
-	return s.GetIntro()
+	return s.GetOutline()
 }
 
 // 获取根节点
@@ -113,8 +113,8 @@ func (s *DMMScraper) GetTitle() string {
 	return s.root.Find(`h1#title`).Text()
 }
 
-// GetIntro 获取简介
-func (s *DMMScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *DMMScraper) GetOutline() string {
 	return util.IntroFilter(s.root.Find(`tr td div.mg-b20.lh4 p.mg-b20`).Text())
 }
 

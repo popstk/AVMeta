@@ -104,8 +104,8 @@ func (s *JavDBScraper) GetTitle() string {
 	return s.root.Find(`h2[class="title"] strong`).Text()
 }
 
-// GetIntro 获取简介
-func (s *JavDBScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *JavDBScraper) GetOutline() string {
 	return GetDmmIntro(s.number, s.Proxy)
 }
 

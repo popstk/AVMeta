@@ -105,8 +105,8 @@ func (s *FC2Scraper) GetTitle() string {
 	return FindFromText(s.fc2Root, exprTitle)
 }
 
-// GetIntro 获取简介
-func (s *FC2Scraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *FC2Scraper) GetOutline() string {
 	return ""
 }
 

@@ -110,8 +110,8 @@ func (s *HeydougaScraper) GetTitle() string {
 	return s.root.Find(`div#title-bg h1`).Text()
 }
 
-// GetIntro 获取简介
-func (s *HeydougaScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *HeydougaScraper) GetOutline() string {
 	return util.IntroFilter(s.root.Find(`div[class="movie-description"] p`).Text())
 }
 

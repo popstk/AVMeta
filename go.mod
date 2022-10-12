@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/PuerkitoBio/goquery v1.5.1
+	github.com/ahuigo/requests v1.0.23
 	github.com/antchfx/htmlquery v1.2.5
 	github.com/schollz/progressbar/v2 v2.15.0
 	github.com/sirupsen/logrus v1.9.0
@@ -14,6 +15,10 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/iai v1.0.479
 	golang.org/x/net v0.0.0-20200421231249-e086a090c8fd
 	golang.org/x/text v0.3.2
+)
+
+require (
+	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/andybalholm/cascadia v1.1.0 // indirect
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect

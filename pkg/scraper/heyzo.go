@@ -94,8 +94,8 @@ func (s *HeyzoScraper) GetTitle() string {
 	return s.json.Name
 }
 
-// GetIntro 获取简介
-func (s *HeyzoScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *HeyzoScraper) GetOutline() string {
 	return s.json.Description
 }
 

@@ -68,8 +68,8 @@ func (s *CaribBeanComScraper) GetTitle() string {
 	return s.root.Find(`h1[itemprop="name"]`).Text()
 }
 
-// GetIntro 获取简介
-func (s *CaribBeanComScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *CaribBeanComScraper) GetOutline() string {
 	// 获取简介
 	intro, err := s.root.Find(`p[itemprop="description"]`).Html()
 	// 检查

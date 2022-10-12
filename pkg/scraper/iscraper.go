@@ -1,11 +1,6 @@
-/*
-Package scraper 网站数据刮削器.
-
-scraper通过IScraper接口，对具体网站进行数据刮削，
-执行刮削操作后，将页面转换为树结构，并存储在刮削对象中，
-当需要任何数据时，执行对应方法，从树结构中查找对应信息。
-*/
 package scraper
+
+import "golang.org/x/net/html"
 
 // IScraper 刮削器接口
 type IScraper interface {
@@ -22,8 +17,8 @@ type IScraper interface {
 
 	// GetTitle 从刮削结果中获取影片标题
 	GetTitle() string
-	// GetIntro 从刮削结果中获取影片简介
-	GetIntro() string
+	// GetOutline 从刮削结果中获取影片简介
+	GetOutline() string
 	// GetDirector 从刮削结果中获取影片导演
 	GetDirector() string
 	// GetRelease 从刮削结果中获取发行时间
@@ -40,4 +35,89 @@ type IScraper interface {
 	GetCover() string
 	// GetActors 从刮削结果中获取影片演员
 	GetActors() map[string]string
+}
+
+type ParserExpr struct {
+	Number      string
+	Title       string
+	Studio      string
+	Release     string
+	Runtime     string
+	Director    string
+	Actor       string
+	Cover       string
+	ExtraFanArt string
+	Tags        string
+	UserRating  string
+	Outline     string
+	Series      string
+}
+
+type Scraper struct {
+	Expr          ParserExpr
+	Uncensored    bool
+	MoreStoryLine bool
+	SpecifiedUrl  string
+
+	uri    string // 页面地址
+	number string // 最终番号
+	root   *html.Node
+}
+
+func (s *Scraper) Fetch(code string) error {
+	return nil
+}
+
+func (s *Scraper) GetURI() string {
+	return s.uri
+}
+
+func (s *Scraper) GetNumber() string {
+	return s.number
+}
+
+func (s *Scraper) GetTitle() string {
+	return FindFromText(s.root, s.Expr.Title)
+}
+
+func (s *Scraper) GetOutline() string {
+	return FindFromText(s.root, s.Expr.Outline)
+}
+
+func (s *Scraper) GetDirector() string {
+	return FindFromText(s.root, s.Expr.Director)
+}
+
+func (s *Scraper) GetRelease() string {
+	return FindFromText(s.root, s.Expr.Release)
+}
+
+func (s *Scraper) GetRuntime() string {
+	return FindFromText(s.root, s.Expr.Runtime)
+}
+
+func (s *Scraper) GetStudio() string {
+	return FindFromText(s.root, s.Expr.Studio)
+}
+
+func (s *Scraper) GetSeries() string {
+	return FindFromText(s.root, s.Expr.Series)
+}
+
+func (s *Scraper) GetTags() string {
+	return FindFromText(s.root, s.Expr.Tags)
+}
+
+func (s *Scraper) GetCover() string {
+	return FindFromText(s.root, s.Expr.Cover)
+}
+
+func (s *Scraper) GetActors() map[string]string {
+	list := FindListFromText(s.root, s.Expr.Actor)
+	m := make(map[string]string, len(list))
+	for _, v := range list {
+		m[v] = ""
+	}
+
+	return m
 }

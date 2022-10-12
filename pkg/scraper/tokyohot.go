@@ -92,8 +92,8 @@ func (s *TokyoHotScraper) GetTitle() string {
 	return s.root.Find(`.pagetitle h2`).Text()
 }
 
-// GetIntro 获取简介
-func (s *TokyoHotScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *TokyoHotScraper) GetOutline() string {
 	// 获取简介
 	intro, err := s.root.Find(`div.sentence`).Html()
 	// 检查错误

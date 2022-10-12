@@ -285,33 +285,3 @@ func saveFile(savePath string, data []byte, length int64) error {
 
 	return err
 }
-
-type Response struct {
-	Respond *http.Response
-	Body    []byte
-}
-
-func HttpGet(c *http.Client, uri string) (*Response, error) {
-	if c == nil {
-		c = http.DefaultClient
-	}
-
-	rsp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := io.ReadAll(rsp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := rsp.Body.Close(); err != nil {
-		return nil, err
-	}
-
-	return &Response{
-		Respond: rsp,
-		Body:    data,
-	}, nil
-}

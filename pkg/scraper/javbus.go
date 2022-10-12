@@ -85,8 +85,8 @@ func (s *JavBusScraper) GetTitle() string {
 	return s.root.Find("h3").Text()
 }
 
-// GetIntro 获取简介
-func (s *JavBusScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *JavBusScraper) GetOutline() string {
 	return GetDmmIntro(s.number, s.Proxy)
 }
 

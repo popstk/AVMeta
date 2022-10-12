@@ -99,7 +99,7 @@ func ParseMedia(s scraper.IScraper, site string) (*Media, error) {
 	// 设置年份
 	m.Year = strings.TrimSpace(GetYear(m.Release))
 	// 简介
-	m.Plot = Inner{Inner: s.GetIntro()}
+	m.Plot = Inner{Inner: s.GetOutline()}
 	// 简介
 	m.Outline = m.Plot
 	// 时长

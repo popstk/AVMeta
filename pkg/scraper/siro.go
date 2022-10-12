@@ -71,8 +71,8 @@ func (s *SiroScraper) GetTitle() string {
 	return s.root.Find(`h1.tag`).Text()
 }
 
-// GetIntro 获取简介
-func (s *SiroScraper) GetIntro() string {
+// GetOutline 获取简介
+func (s *SiroScraper) GetOutline() string {
 	return util.IntroFilter(s.root.Find(`#introduction p.introduction`).Text())
 }
 
