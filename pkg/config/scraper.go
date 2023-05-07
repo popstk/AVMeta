@@ -1,11 +1,11 @@
 package config
 
 type Scraper struct {
-	Disable    bool   `yaml:"disable"`
-	Site       string `yaml:"site"`
-	UseProxy   bool   `yaml:"use_proxy"`
-	Proxy      string `yaml:"proxy"`
-	CookieFile string `yaml:"cookie_file"`
+	Disable    bool   `mapstructure:"disable"`
+	Site       string `mapstructure:"site"`
+	UseProxy   bool   `mapstructure:"use_proxy"`
+	Proxy      string `mapstructure:"proxy"`
+	CookieFile string `mapstructure:"cookie_file"`
 }
 
 func (s *Scraper) GetProxy() string {

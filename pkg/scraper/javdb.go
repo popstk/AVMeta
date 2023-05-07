@@ -66,7 +66,7 @@ func (s *JavDBScraper) Fetch(code string) error {
 	// 组合地址
 	uri := fmt.Sprintf("%s%s", util.CheckDomainPrefix(s.conf.Site), id)
 
-	log.Infof("uri: %s", uri)
+	log.Infof("javdb found real uri: %s", uri)
 	rsp, err := s.session.Get(uri)
 	if err != nil {
 		return fmt.Errorf("%s [fetch]: %s", uri, err)

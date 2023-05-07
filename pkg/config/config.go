@@ -37,13 +37,13 @@ type SiteStruct struct {
 
 // Conf 程序配置信息结构
 type Conf struct {
-	Base    BaseStruct         `yaml:"base"`     // 基础配置
-	Path    PathStruct         `yaml:"path"`     // 路径配置
-	Media   MediaStruct        `yaml:"media"`    // 媒体库配置
-	Site    SiteStruct         `yaml:"site"`     // 免翻地址配置
-	Code    []string           `yaml:"code"`     // 优先匹配番号
-	Scraper map[string]Scraper `yaml:"scraper"`  // 爬虫配置
-	ActorAs map[string]string  `yaml:"actor_as"` // 演员同名替换
+	Base    BaseStruct         `mapstructure:"base"`     // 基础配置
+	Path    PathStruct         `mapstructure:"path"`     // 路径配置
+	Media   MediaStruct        `mapstructure:"media"`    // 媒体库配置
+	Site    SiteStruct         `mapstructure:"site"`     // 免翻地址配置
+	Code    []string           `mapstructure:"code"`     // 优先匹配番号
+	Scraper map[string]Scraper `mapstructure:"scraper"`  // 爬虫配置
+	ActorAs map[string]string  `mapstructure:"actor_as"` // 演员同名替换
 
 	IgnoreDir map[string]struct{} `yaml:"-"`
 }
@@ -133,6 +133,7 @@ func WriteConfig() (*Conf, error) {
 	viper.Set("media", cfg.Media)
 	viper.Set("site", cfg.Site)
 	viper.Set("code", cfg.Code)
+	viper.Set("actor_as", cfg.ActorAs)
 
 	return cfg, viper.SafeWriteConfig()
 }

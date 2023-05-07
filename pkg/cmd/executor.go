@@ -67,10 +67,11 @@ func (e *Executor) Execute() error {
 func (e *Executor) initConfig() {
 	// 获取配置
 	cfg, err := config.GetConfig(e.configFile)
-	// 检查
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Debugf("cfg %+v", cfg)
 
 	// 配置信息
 	e.cfg = cfg
