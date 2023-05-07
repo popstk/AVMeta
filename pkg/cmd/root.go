@@ -6,7 +6,6 @@ import (
 	"github.com/ylqjgm/AVMeta/pkg/media"
 	"github.com/ylqjgm/AVMeta/pkg/util"
 	"io/fs"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -35,19 +34,9 @@ func (e *Executor) rootRunFunc(_ *cobra.Command, _ []string) {
 	files := e.findFiles()
 	log.Infof("共探索到 %d 个视频文件, 开始刮削整理...", len(files))
 
-	// 初始化进程
-	wg := util.NewWaitGroup(2)
-
-	// 循环视频文件列表
-	for _, file := range files {
-		// 计数加
-		wg.AddDelta()
-		// 刮削进程
-		e.packProcess(file, wg)
+	for i, file := range files {
+		e.packProcess(i, file)
 	}
-
-	// 等待结束
-	wg.Wait()
 }
 
 func (e *Executor) findFiles() []string {
@@ -89,24 +78,20 @@ func (e *Executor) findFiles() []string {
 }
 
 // 刮削进程
-func (e *Executor) packProcess(file string, wg *util.WaitGroup) {
+func (e *Executor) packProcess(i int, file string) {
 	// 刮削整理
 	m, err := media.Pack(file, e.cfg)
 	// 检查
 	if err != nil {
 		// 恢复文件
-		util.FailFile(file, e.cfg.Path.Fail)
+		if len(e.cfg.Path.Fail) > 0 {
+			util.FailFile(file, e.cfg.Path.Fail)
+		}
 
 		log.Errorf("pack err: %v", err)
-		// 进程
-		wg.Done()
-
 		return
 	}
 
 	// 输出正确
-	log.Infof("文件 [%s] 刮削成功, 来源 [%s], 路径 [%s]", path.Base(file), m.Source, m.DirPath)
-
-	// 进程
-	wg.Done()
+	log.Infof("[%d]Done[%s] -> [%s]", i+1, m.Source, m.DirPath)
 }

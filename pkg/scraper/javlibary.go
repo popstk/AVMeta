@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ahuigo/requests"
 	"github.com/antchfx/htmlquery"
+	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -33,9 +34,8 @@ type JavLibraryScraper struct {
 	Scraper
 }
 
-func NewJavLibraryScraper(site, proxy string) *JavLibraryScraper {
+func NewJavLibraryScraper(proxy string) *JavLibraryScraper {
 	return &JavLibraryScraper{
-		Site:    site,
 		Proxy:   proxy,
 		Scraper: Scraper{Expr: JavLibraryExpr},
 	}
@@ -43,21 +43,34 @@ func NewJavLibraryScraper(site, proxy string) *JavLibraryScraper {
 
 // Fetch 刮削
 func (s *JavLibraryScraper) Fetch(code string) error {
+	keyValue := make(map[string]string)
+	keyValue["over18"] = "1"
+
+	var cookies []string
+	for _, value := range cookies {
+		p := strings.SplitN(value, "=", 2)
+		if len(p) != 2 {
+			return fmt.Errorf("invalid cookie %s", value)
+		}
+		keyValue[p[0]] = p[1]
+	}
+
 	// 设置番号
 	s.number = strings.ToUpper(code)
-	s.session = RequestSession(MapToCookie(map[string]string{
-		"over18": "1",
-	}), DefaultUA, 3, 0, s.Proxy, false)
+	s.session = RequestSession(MapToCookie(keyValue), DefaultUA, 3, 0, s.Proxy, false)
 
 	var err error
 	s.uri, err = s.queryNumberUrl()
 	if err != nil {
-		return err
+		return fmt.Errorf("queryNumberUrl: %w", err)
 	}
+
+	log.Infof("queryNumberUrl uri %s", s.uri)
+
 	if s.root == nil {
 		rsp, err := s.session.Get(s.uri)
 		if err != nil {
-			return err
+			return fmt.Errorf("session get: %w", err)
 		}
 		s.root, err = htmlquery.Parse(bytes.NewReader(rsp.Body()))
 		if err != nil {
@@ -65,7 +78,6 @@ func (s *JavLibraryScraper) Fetch(code string) error {
 		}
 	}
 
-	// 获取信息
 	return nil
 }
 
@@ -79,10 +91,14 @@ func (s *JavLibraryScraper) queryNumberUrl() (string, error) {
 	}
 
 	finalURL := rsp.R.Request.URL.String()
+	log.Infof("finalURL %s", finalURL)
+
 	node, err := htmlquery.Parse(bytes.NewReader(rsp.Body()))
 	if err != nil {
 		return "", fmt.Errorf("parse body: %s, err: %w", rsp.Body(), err)
 	}
+
+	log.Infof("html: %s", htmlquery.OutputHTML(node, false))
 
 	if strings.Contains(finalURL, "/?v=jav") {
 		s.root = node
@@ -101,6 +117,8 @@ func (s *JavLibraryScraper) queryNumberUrl() (string, error) {
 	if found < 0 {
 		return "", nil
 	}
+
+	log.Infof("found index %d", found)
 
 	urls := FindListFromText(node, `//div[@class="id"]/../@href`)
 	if found >= len(urls) {

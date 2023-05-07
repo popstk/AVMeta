@@ -37,13 +37,19 @@ type SiteStruct struct {
 
 // Conf 程序配置信息结构
 type Conf struct {
-	Base  BaseStruct  // 基础配置
-	Path  PathStruct  // 路径配置
-	Media MediaStruct // 媒体库配置
-	Site  SiteStruct  // 免翻地址配置
-	Code  []string    // 优先匹配番号
+	Base    BaseStruct         `yaml:"base"`     // 基础配置
+	Path    PathStruct         `yaml:"path"`     // 路径配置
+	Media   MediaStruct        `yaml:"media"`    // 媒体库配置
+	Site    SiteStruct         `yaml:"site"`     // 免翻地址配置
+	Code    []string           `yaml:"code"`     // 优先匹配番号
+	Scraper map[string]Scraper `yaml:"scraper"`  // 爬虫配置
+	ActorAs map[string]string  `yaml:"actor_as"` // 演员同名替换
 
 	IgnoreDir map[string]struct{} `yaml:"-"`
+}
+
+func (c *Conf) GetScraper(name string) Scraper {
+	return c.Scraper[name]
 }
 
 func SetDefaultConfigFile() {

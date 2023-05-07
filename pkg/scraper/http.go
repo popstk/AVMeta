@@ -1,7 +1,6 @@
 package scraper
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/ahuigo/requests"
@@ -44,11 +43,6 @@ func RequestSession(cookies []*http.Cookie, ua string, retry int, timeout time.D
 
 	if len(proxies) > 0 {
 		s.Proxy(proxies)
-	}
-
-	if !verify {
-		tr := s.Client.Transport.(*http.Transport)
-		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: verify}
 	}
 
 	return s

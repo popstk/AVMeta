@@ -124,6 +124,15 @@ func capture(file string, cfg *config.Conf) (*Media, error) {
 		return nil, err
 	}
 
+	// 替换同名
+	if len(cfg.ActorAs) > 0 {
+		for i, actor := range m.Actor {
+			if val, ok := cfg.ActorAs[actor.Name]; ok {
+				m.Actor[i].Name = val
+			}
+		}
+	}
+
 	// 是否有图片
 	if m.Cover == "" {
 		return nil, fmt.Errorf("[site:%s]找不到封面", m.Source)
@@ -141,7 +150,7 @@ func capture(file string, cfg *config.Conf) (*Media, error) {
 	// 获取图片后缀
 	ext := path.Ext(m.Cover)
 	// 下载图片
-	err = util.SavePhoto(m.Cover, fmt.Sprintf("%s/fanart.jpg", m.DirPath), cfg.Base.Proxy, !strings.EqualFold(strings.ToLower(ext), ".jpg"))
+	err = util.SavePhoto(m.Cover, fmt.Sprintf("%s/fanart.jpg", m.DirPath), "", !strings.EqualFold(strings.ToLower(ext), ".jpg"))
 	// 检查
 	if err != nil {
 		return nil, err
@@ -211,18 +220,19 @@ func search(file string, cfg *config.Conf) (*Media, error) {
 			},
 		*/
 	}
-	// 定义一个没有正则匹配的刮削对象数组
-	ss := []captures{
-		{
-			Name: "JavDB",
-			S:    scraper.NewJavDBScraper(cfg.Site.JavDB, cfg.Base.Proxy),
+
+	var ss []captures
+	for name, f := range scraper.RegisterScraper {
+		c := cfg.GetScraper(name)
+		if c.Disable {
+			continue
+		}
+
+		ss = append(ss, captures{
+			Name: name,
+			S:    f(c),
 			R:    nil,
-		},
-		{
-			Name: "JavBus",
-			S:    scraper.NewJavBusScraper(cfg.Site.JavBus, cfg.Base.Proxy),
-			R:    nil,
-		},
+		})
 	}
 
 	// 转换番号为小写

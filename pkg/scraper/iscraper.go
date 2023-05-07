@@ -104,8 +104,8 @@ func (s *Scraper) GetSeries() string {
 	return FindFromText(s.root, s.Expr.Series)
 }
 
-func (s *Scraper) GetTags() string {
-	return FindFromText(s.root, s.Expr.Tags)
+func (s *Scraper) GetTags() []string {
+	return FindListFromText(s.root, s.Expr.Tags)
 }
 
 func (s *Scraper) GetCover() string {

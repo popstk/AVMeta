@@ -53,6 +53,7 @@ func NewExecutor(version, commit, built string) *Executor {
 	e.initNfo()
 	e.initVersion()
 	e.initClean()
+	e.initDebug()
 
 	return e
 }

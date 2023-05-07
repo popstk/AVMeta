@@ -1,7 +1,12 @@
 package scraper
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/ahuigo/requests"
+	log "github.com/sirupsen/logrus"
+	"github.com/ylqjgm/AVMeta/pkg/config"
+	"net/http"
 	"strings"
 
 	"github.com/ylqjgm/AVMeta/pkg/util"
@@ -9,27 +14,48 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+const JavDB = "javdb"
+
+func init() {
+	RegisterScraper[JavDB] = func(c config.Scraper) IScraper {
+		return NewJavDBScraper(c)
+	}
+}
+
 // JavDBScraper javdb网站刮削器
 type JavDBScraper struct {
-	Site   string            // 免翻地址
-	Proxy  string            // 代理配置
-	uri    string            // 页面地址
-	number string            // 最终番号
-	root   *goquery.Document // 根节点
+	conf *config.Scraper
+
+	session *requests.Session
+	uri     string            // 页面地址
+	number  string            // 最终番号
+	root    *goquery.Document // 根节点
 }
 
 // NewJavDBScraper 返回一个被初始化的javdb刮削对象
 //
 // site 字符串参数，传入免翻地址，
 // proxy 字符串参数，传入代理信息
-func NewJavDBScraper(site, proxy string) *JavDBScraper {
-	return &JavDBScraper{Site: site, Proxy: proxy}
+func NewJavDBScraper(conf config.Scraper) *JavDBScraper {
+	return &JavDBScraper{conf: &conf}
 }
 
 // Fetch 刮削
 func (s *JavDBScraper) Fetch(code string) error {
 	// 设置番号
 	s.number = strings.ToUpper(code)
+
+	var cookies []*http.Cookie
+	if len(s.conf.CookieFile) > 0 {
+		val, err := ReadCookieFromFile(s.conf.CookieFile)
+		if err != nil {
+			return err
+		}
+		cookies = val
+	}
+
+	s.session = RequestSession(cookies, DefaultUA, 3, 0, s.conf.GetProxy(), false)
+
 	// 搜索
 	id, err := s.search()
 	// 检查错误
@@ -38,13 +64,17 @@ func (s *JavDBScraper) Fetch(code string) error {
 	}
 
 	// 组合地址
-	uri := fmt.Sprintf("%s%s", util.CheckDomainPrefix(s.Site), id)
+	uri := fmt.Sprintf("%s%s", util.CheckDomainPrefix(s.conf.Site), id)
 
-	// 打开连接
-	root, err := util.GetRoot(uri, s.Proxy, nil)
-	// 检查错误
+	log.Infof("uri: %s", uri)
+	rsp, err := s.session.Get(uri)
 	if err != nil {
 		return fmt.Errorf("%s [fetch]: %s", uri, err)
+	}
+
+	root, err := goquery.NewDocumentFromReader(bytes.NewReader(rsp.Body()))
+	if err != nil {
+		return fmt.Errorf("%s [goquery]: %s", uri, err)
 	}
 
 	// 设置页面地址
@@ -58,11 +88,17 @@ func (s *JavDBScraper) Fetch(code string) error {
 // 搜索影片
 func (s *JavDBScraper) search() (string, error) {
 	// 组合地址
-	uri := fmt.Sprintf("%s/search?q=%s&f=all", util.CheckDomainPrefix(s.Site), strings.ToUpper(s.number))
+	uri := fmt.Sprintf("%s/search?q=%s&f=all", util.CheckDomainPrefix(s.conf.Site), strings.ToUpper(s.number))
 
-	// 打开地址
-	root, err := util.GetRoot(uri, s.Proxy, nil)
-	// 检查错误
+	rsp, err := s.session.Get(uri)
+	if err != nil {
+		return "", err
+	}
+
+	content := rsp.Body()
+	log.Debugf("content: %s", string(content))
+
+	root, err := goquery.NewDocumentFromReader(bytes.NewReader(content))
 	if err != nil {
 		return "", err
 	}
@@ -76,9 +112,12 @@ func (s *JavDBScraper) search() (string, error) {
 	var id string
 
 	// 循环检查番号
-	root.Find(`div#videos .grid-item a`).Each(func(i int, item *goquery.Selection) {
+	items := root.Find(`.movie-list>.item>a`)
+	log.Debugf("items: %s", items.Text())
+
+	items.Each(func(i int, item *goquery.Selection) {
 		// 获取番号
-		date := item.Find("div.uid").Text()
+		date := item.Find(".video-title>strong").Text()
 		// 大写并去除空白
 		date = strings.ToUpper(strings.TrimSpace(date))
 		// 检查番号是否完全正确
@@ -101,12 +140,12 @@ func (s *JavDBScraper) search() (string, error) {
 
 // GetTitle 获取名称
 func (s *JavDBScraper) GetTitle() string {
-	return s.root.Find(`h2[class="title"] strong`).Text()
+	return s.root.Find(`div.video-detail .current-title`).Text()
 }
 
 // GetOutline 获取简介
 func (s *JavDBScraper) GetOutline() string {
-	return GetDmmIntro(s.number, s.Proxy)
+	return GetDmmIntro(s.number, s.conf.GetProxy())
 }
 
 // GetDirector 获取导演
@@ -197,10 +236,16 @@ func (s *JavDBScraper) GetActors() map[string]string {
 	// 演员列表
 	actors := make(map[string]string)
 
-	// 循环获取
-	s.root.Find(`strong:contains("演員")`).NextFiltered(`span.value`).Find("a").Each(func(i int, item *goquery.Selection) {
-		// 演员名称
-		actors[strings.TrimSpace(item.Text())] = ""
+	node := s.root.Find(`strong:contains("演員")`).NextFiltered(`span.value`)
+	var lastActor string
+	node.Children().Each(func(i int, selection *goquery.Selection) {
+		if i%2 == 0 {
+			lastActor = selection.Text()
+			return
+		}
+		if selection.HasClass("female") {
+			actors[lastActor] = ""
+		}
 	})
 
 	return actors
